@@ -28,6 +28,7 @@ app.use("/api/tasks", taskRoutes);
 app.use("/api/stats", statsRoutes);
 app.use("/api/history", historyRoutes); 
 
+
 app.get("/", (req, res) => {
   res.send("✅ Backend running successfully!");
 });

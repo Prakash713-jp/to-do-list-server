@@ -1,24 +1,36 @@
-// routes/history.routes.js
+// 📁 routes/history.routes.js (UPDATED)
 
 import express from "express";
 import { authMiddleware } from "../middlewares/auth.js";
-import { getHistory } from "../controllers/history.controller.js"; 
-import { createHistoryRecord } from "../controllers/history.controller.js";
+import { 
+    getHistory, 
+    createHistoryRecord, 
+    deleteHistoryRecord 
+} from "../controllers/history.controller.js"; 
 
 const router = express.Router();
+
 router.use(authMiddleware); // Protect all history routes
 
-// Route for fetching history (matches the front-end GET /api/history)
+// Route for fetching history (GET /api/history)
 router.get("/", getHistory);
 
-// Route for creating a history record (matches the front-end POST /api/history)
+// 💥 DELETE ROUTE: DELETE /api/history/:id (Confirmed correct structure for 404 fix)
+router.delete('/:id', deleteHistoryRecord); 
+
+// Route for manually creating a history record (POST /api/history)
 router.post("/", async (req, res) => {
     try {
-        // Assuming req.body contains the history record data from AuthContext.js
+        // Assumes req.body contains { action, taskSnapshot: { ... }, completedAt, deletedAt }
         const newRecord = await createHistoryRecord(req.body, req.user._id);
-        res.status(201).json(newRecord);
+        if (newRecord) {
+             res.status(201).json(newRecord);
+        } else {
+             res.status(500).json({ message: 'Failed to create history record (internal error)' });
+        }
     } catch (error) {
-        res.status(500).json({ message: 'Failed to create history record', error });
+        console.error("Error creating history record:", error);
+        res.status(500).json({ message: 'Failed to create history record', error: error.message });
     }
 });
 
